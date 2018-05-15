@@ -11,18 +11,19 @@ public class redalign : MonoBehaviour {
     private float sensativity;
     private GameObject target;
     private float xbound, ybound, wbound, hbound;
+    private CircleArcRender arcrenderer;
+    private float arcstart, arclength;
+    private float redradius;
     
     // Use this for initialization
     void Start () {
-	Screen.orientation = ScreenOrientation.LandscapeLeft;
-
 	screenh = Camera.main.orthographicSize * 2;
-	screenw = screenh * Screen.height/ Screen.width;
+	screenw = screenh * Screen.width/ Screen.height;
+
 	float widthofred = GetComponent<SpriteRenderer>().bounds.size.x;
-	posoffset = new Vector2(widthofred/2, widthofred/2); 
-	
-        pos = new Vector2(-screenw/2,0) + posoffset;
-	transform.position = pos;
+	redradius = widthofred/2.0f;
+	posoffset = new Vector2(redradius, redradius); 
+       
 	sensativity = 2.0f;
 
 	if(gameObject.name == "red"){
@@ -37,6 +38,12 @@ public class redalign : MonoBehaviour {
 	wbound = screenw/2;
 	hbound = screenh;
 	target.transform.position = new Vector2(target.transform.position.x + xbound + wbound/2, target.transform.position.y);
+
+	arcrenderer = (CircleArcRender) target.GetComponent(typeof(CircleArcRender));
+	arcrenderer.xradius = wbound*(1.0f/6.0f);
+	arcrenderer.yradius = arcrenderer.xradius;
+	
+	teleportRandom();
     }
 	
     // Update is called once per frame
@@ -84,7 +91,7 @@ public class redalign : MonoBehaviour {
 
 	
 	//collision with target
-	if((transform.position-target.transform.position).magnitude < 0.125){
+	if((transform.position-target.transform.position).magnitude < redradius*1.5f){
 	    teleportRandom();
 	}
     }
@@ -98,6 +105,17 @@ public class redalign : MonoBehaviour {
     }
 
     void teleportRandom(){
-	transform.position = new Vector2(Random.Range(xbound, xbound+wbound), Random.Range(ybound-hbound, ybound)) + posoffset;
+	// first choose a point using polar coordinates, then convert.
+	int newangle = Random.Range(0, 360);
+	float spawnradius = (1.0f/4.0f);
+	float minmagnitude = spawnradius*wbound + redradius;
+	float maxmagnitude = (1.0f/2.0f)*wbound - redradius;
+	float magnitude = Random.Range(minmagnitude, maxmagnitude);
+	Debug.Log(magnitude);
+	transform.position = new Vector3(Mathf.Sin (Mathf.Deg2Rad *newangle)*magnitude, Mathf.Cos(Mathf.Deg2Rad *newangle)*magnitude, 0) + target.transform.position;
+	
+	arcstart = Random.Range(0, 360);
+	arclength = Random.Range(30, 180);
+	arcrenderer.CreatePoints(arcstart, arclength);
     }
 }
