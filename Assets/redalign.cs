@@ -35,6 +35,7 @@ public class redalign : MonoBehaviour {
 	    xbound = 0;
 	    ybound = screenh/2;
 	}
+	
 	wbound = screenw/2;
 	hbound = screenh;
 	target.transform.position = new Vector2(target.transform.position.x + xbound + wbound/2, target.transform.position.y);
@@ -47,7 +48,7 @@ public class redalign : MonoBehaviour {
     }
 	
     // Update is called once per frame
-    void Update () {	
+    public void move(){	
 	if (Input.touches.Length > 0)
         {
 	    for(int i = 0; i<Input.touches.Length; i++){
@@ -111,7 +112,7 @@ public class redalign : MonoBehaviour {
 	float minmagnitude = spawnradius*wbound + redradius;
 	float maxmagnitude = (1.0f/2.0f)*wbound - redradius;
 	float magnitude = Random.Range(minmagnitude, maxmagnitude);
-	Debug.Log(magnitude);
+	//Debug.Log(magnitude);
 	transform.position = new Vector3(Mathf.Sin (Mathf.Deg2Rad *newangle)*magnitude, Mathf.Cos(Mathf.Deg2Rad *newangle)*magnitude, 0) + target.transform.position;
 	
 	arcstart = Random.Range(0, 360);
