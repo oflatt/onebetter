@@ -6,7 +6,6 @@ public class redalign : MonoBehaviour {
     public Vector2 pos;
     private float screenh, screenw;
     private Vector2 posoffset;
-    private Vector2 fp;   //First touch position
     private Vector2 lp;   //Last touch position
     private float sensativity;
     private GameObject target;
@@ -14,6 +13,7 @@ public class redalign : MonoBehaviour {
     private CircleArcRender arcrenderer;
     private float arcstart, arclength;
     private float redradius;
+    public bool stuckp;
     
     // Use this for initialization
     void Start () {
@@ -43,13 +43,13 @@ public class redalign : MonoBehaviour {
 	arcrenderer = (CircleArcRender) target.GetComponent(typeof(CircleArcRender));
 	arcrenderer.xradius = wbound*(1.0f/6.0f);
 	arcrenderer.yradius = arcrenderer.xradius;
-	
+
 	teleportRandom();
     }
 	
     // Update is called once per frame
-    public void move(){	
-	if (Input.touches.Length > 0)
+    public void move(){
+	if (Input.touches.Length > 0 && !stuckp)
         {
 	    for(int i = 0; i<Input.touches.Length; i++){
 		//record the touch location
@@ -59,7 +59,6 @@ public class redalign : MonoBehaviour {
 		if(posunits.x - screenw/2 >= xbound && posunits.x-(screenw/2) <= xbound + wbound && posunits.y < ybound  && posunits.y > ybound-hbound){
 		    if (touch.phase == TouchPhase.Began) //check for the first touch
 		    {
-			fp = touch.position;
 			lp = touch.position;
 		    }
 		    else if (touch.phase == TouchPhase.Moved) // update the last position based on where they moved
@@ -74,6 +73,7 @@ public class redalign : MonoBehaviour {
 	}
 
 	//collision with edges of screen
+	
 	Vector2 bottomleft = currentPos() - posoffset;
 	Vector2 topright = currentPos() + posoffset;
 	if(bottomleft.x < xbound){
@@ -89,12 +89,12 @@ public class redalign : MonoBehaviour {
 	if(topright.y>ybound){
 	    transform.position = new Vector2(currentPos().x, -posoffset.y+ybound);
 	}
-
 	
-	//collision with target
-	if((transform.position-target.transform.position).magnitude < redradius*1.5f){
-	    teleportRandom();
+
+	if (collidesWithTargetp()) {
+	    stuckp = true;
 	}
+	
     }
 
     Vector2 pixeltounits(Vector2 p){
@@ -105,7 +105,11 @@ public class redalign : MonoBehaviour {
 	return new Vector2(transform.position.x, transform.position.y);
     }
 
-    void teleportRandom(){
+    bool collidesWithTargetp(){
+	return (transform.position-target.transform.position).magnitude < redradius*1.5f;
+    }
+
+    public void teleportRandom(){
 	// first choose a point using polar coordinates, then convert.
 	int newangle = Random.Range(0, 360);
 	float spawnradius = (1.0f/4.0f);
@@ -118,5 +122,6 @@ public class redalign : MonoBehaviour {
 	arcstart = Random.Range(0, 360);
 	arclength = Random.Range(30, 180);
 	arcrenderer.CreatePoints(arcstart, arclength);
+	stuckp = false;
     }
 }
