@@ -28,8 +28,8 @@ public class CircleArcRender : MonoBehaviour
 		
 	for (int i = 0; i < (segments + 1); i++)
 	{
-	    x = Mathf.Sin (Mathf.Deg2Rad * angle) * xradius;
-	    y = Mathf.Cos (Mathf.Deg2Rad * angle) * yradius;
+	    y = Mathf.Sin (Mathf.Deg2Rad * angle) * xradius;
+	    x = Mathf.Cos (Mathf.Deg2Rad * angle) * yradius;
 			
 	    line.SetPosition (i, new Vector3(x,y,z));
 			

@@ -44,7 +44,7 @@ public class redalign : MonoBehaviour {
 	arcrenderer.xradius = wbound*(1.0f/6.0f);
 	arcrenderer.yradius = arcrenderer.xradius;
 
-	teleportRandom();
+	teleportRandom(0);
     }
 	
     // Update is called once per frame
@@ -109,7 +109,61 @@ public class redalign : MonoBehaviour {
 	return (transform.position-target.transform.position).magnitude < redradius*1.5f;
     }
 
-    public void teleportRandom(){
+    public bool collidesWithObstaclep() {
+	if(arclength <0.0000001){
+	    return false;
+	}
+	
+	float rx = transform.position.x - (xbound+wbound/2);
+	float ry = transform.position.y;
+	// first check if it collides between the two ends
+	float redangle = Mathf.Atan(ry/rx);
+	if((ry < 0 && rx < 0) || (ry > 0 && rx < 0)) {
+	    redangle += Mathf.PI;
+	}
+
+	redangle = redangle % (Mathf.PI*2);
+
+	float arcstartradians = arcstart * Mathf.Deg2Rad;
+	float arcendradians = arcstartradians + arclength*Mathf.Deg2Rad;
+	Vector2 rvector = new Vector2(rx, ry);
+	float redmagnitude = rvector.magnitude;
+
+	bool collidesbetween = false;
+
+	if(redangle>=arcstartradians && redangle<=arcendradians){
+	    collidesbetween = true;
+	} else if(arcendradians>Mathf.PI*2){
+	    if(redangle <= arcendradians%(Mathf.PI*2)) {
+		collidesbetween = true;
+	    }
+	}
+	float circlemag = arcrenderer.xradius;
+	
+	//check magnitude
+	if(collidesbetween) {
+	    if (!(redmagnitude <= circlemag+redradius && redmagnitude >= circlemag-redradius)){
+		collidesbetween = false;
+	    }
+	}
+
+	//now check ends of line
+	Vector2 end1 = new Vector2(Mathf.Cos(arcstartradians)*circlemag, Mathf.Sin(arcstartradians)*circlemag);
+	Vector2 end2 = new Vector2(Mathf.Cos(arcendradians)*circlemag, Mathf.Sin(arcendradians)*circlemag);
+	if((end1-rvector).magnitude <= redradius || (end2-rvector).magnitude <= redradius){
+	    collidesbetween = true;
+	}
+	
+	
+	//if(gameObject.name == "red"){
+	//    Debug.Log("redangle: " + redangle);
+	//    Debug.Log(arcstartradians);
+	//    Debug.Log(arcendradians);
+	//}
+	return collidesbetween;
+    }
+
+    public void teleportRandom(int score){
 	// first choose a point using polar coordinates, then convert.
 	int newangle = Random.Range(0, 360);
 	float spawnradius = (1.0f/4.0f);
@@ -117,10 +171,18 @@ public class redalign : MonoBehaviour {
 	float maxmagnitude = (1.0f/2.0f)*wbound - redradius;
 	float magnitude = Random.Range(minmagnitude, maxmagnitude);
 	//Debug.Log(magnitude);
-	transform.position = new Vector3(Mathf.Sin (Mathf.Deg2Rad *newangle)*magnitude, Mathf.Cos(Mathf.Deg2Rad *newangle)*magnitude, 0) + target.transform.position;
-	
+	transform.position = new Vector3(Mathf.Cos (Mathf.Deg2Rad *newangle)*magnitude, Mathf.Sin(Mathf.Deg2Rad *newangle)*magnitude, 0) + target.transform.position;
+
 	arcstart = Random.Range(0, 360);
-	arclength = Random.Range(30, 180);
+	if(score < 2){
+	    arclength = 0;
+	} else{
+	    float maxarclength = 0.3f*Mathf.Sqrt(score + 6.5f - 2.0f) - 0.6f - 0.0175f*score;
+	    float minarclength = maxarclength - 0.1f;
+	    maxarclength *= 360;
+	    minarclength *= 360;
+	    arclength = Random.Range(minarclength, maxarclength);
+	}
 	arcrenderer.CreatePoints(arcstart, arclength);
 	stuckp = false;
     }

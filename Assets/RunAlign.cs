@@ -42,10 +42,8 @@ public class RunAlign : MonoBehaviour {
 
 	if (red1.stuckp && red2.stuckp) {
 	    reset();
-	}
-
-	// lose
-	if(df > speed) {
+	} else if(df > speed || red1.collidesWithObstaclep() || red2.collidesWithObstaclep()) {
+	    //lose
 	    SceneManager.LoadScene("lose");
 	    Manager.Instance.lastscore = score;
 	}
@@ -56,7 +54,7 @@ public class RunAlign : MonoBehaviour {
 	scoretext.text = ""+score;
 	speed = (4.7f-Mathf.Pow(score+1.0f, 1.0f/3.0f)*0.8f)*1000.0f;
 	roundstart = Time.time * 1000;
-	red1.teleportRandom();
-	red2.teleportRandom();
+	red1.teleportRandom(score);
+	red2.teleportRandom(score);
     }
 }
