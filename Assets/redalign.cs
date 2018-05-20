@@ -138,7 +138,7 @@ public class redalign : MonoBehaviour {
 		collidesbetween = true;
 	    }
 	}
-	float circlemag = arcrenderer.xradius;
+	float circlemag = arcrenderer.xradius*target.transform.localScale.x;
 	
 	//check magnitude
 	if(collidesbetween) {
