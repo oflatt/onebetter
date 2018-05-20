@@ -1,5 +1,7 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class RunAlign : MonoBehaviour {
     private redalign red1, red2;
@@ -7,6 +9,8 @@ public class RunAlign : MonoBehaviour {
     private float speed;
     private float screenh, screenw;
     private float roundstart;
+    public Text scoretext;
+    private int score;
 
     void Start(){
 	screenh = Camera.main.orthographicSize * 2;
@@ -17,6 +21,11 @@ public class RunAlign : MonoBehaviour {
 	timeline.useWorldSpace = true;
 
 	timeline.SetPosition(0, new Vector3(-screenw/2, screenh/2 - timeline.startWidth/2, 0));
+
+	scoretext = GameObject.Find("scoretext").GetComponent<Text>();
+	scoretext.text = "0";
+
+	score = 0;
 
 	// speed is the time that the current game lasts in millis
 	// for the first round it is 4 seconds
@@ -34,10 +43,18 @@ public class RunAlign : MonoBehaviour {
 	if (red1.stuckp && red2.stuckp) {
 	    reset();
 	}
+
+	// lose
+	if(df > speed) {
+	    SceneManager.LoadScene("lose");
+	    Manager.Instance.lastscore = score;
+	}
     }
 
     void reset() {
-	speed -= 100.0f;
+	score += 1;
+	scoretext.text = ""+score;
+	speed = (4.7f-Mathf.Pow(score+1.0f, 1.0f/3.0f)*0.8f)*1000.0f;
 	roundstart = Time.time * 1000;
 	red1.teleportRandom();
 	red2.teleportRandom();
